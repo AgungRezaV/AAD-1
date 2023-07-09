@@ -6,13 +6,19 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.dicoding.todoapp.R
+import com.dicoding.todoapp.data.Task
+import com.dicoding.todoapp.ui.ViewModelFactory
 import com.dicoding.todoapp.utils.DatePickerFragment
+import com.google.android.material.textfield.TextInputEditText
 import java.text.SimpleDateFormat
 import java.util.*
 
 class AddTaskActivity : AppCompatActivity(), DatePickerFragment.DialogDateListener {
     private var dueDateMillis: Long = System.currentTimeMillis()
+
+    private lateinit var viewModel: AddTaskViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -20,6 +26,8 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.DialogDateListen
 
         supportActionBar?.title = getString(R.string.add_task)
 
+        val factory = ViewModelFactory.getInstance(this)
+        viewModel = ViewModelProvider(this, factory)[AddTaskViewModel::class.java]
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -31,6 +39,18 @@ class AddTaskActivity : AppCompatActivity(), DatePickerFragment.DialogDateListen
         return when (item.itemId) {
             R.id.action_save -> {
                 //TODO 12 : Create AddTaskViewModel and insert new task to database
+                val title = findViewById<TextInputEditText>(R.id.add_ed_title).text.toString()
+                val description = findViewById<TextInputEditText>(R.id.add_ed_description).text.toString()
+
+                viewModel.addTask(
+                    Task(
+                        title = title,
+                        description = description,
+                        dueDateMillis = dueDateMillis,
+                        isCompleted = false
+                    )
+                )
+                finish()
                 true
             }
             else -> super.onOptionsItemSelected(item)
