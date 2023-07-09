@@ -55,8 +55,7 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
     }
 
     private fun showNotification(task: Task) {
-        val notificationManagerCompat =
-            applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val notificationManagerCompat = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
         val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val builder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
@@ -64,7 +63,7 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
             .setContentTitle(task.title)
             .setContentText("Due in ${DateConverter.convertMillisToString(task.dueDateMillis)}.")
             .setColor(ContextCompat.getColor(applicationContext, android.R.color.transparent))
-            .setVibrate(longArrayOf(2000, 2000, 2000, 2000, 2000))
+            .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
             .setSound(alarmSound)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -75,7 +74,7 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
             )
 
             channel.enableVibration(true)
-            channel.vibrationPattern = longArrayOf(2000, 2000, 2000, 2000, 2000)
+            channel.vibrationPattern = longArrayOf(1000, 1000, 1000, 1000, 1000)
             builder.setChannelId(NOTIFICATION_CHANNEL_ID)
             notificationManagerCompat.createNotificationChannel(channel)
         }

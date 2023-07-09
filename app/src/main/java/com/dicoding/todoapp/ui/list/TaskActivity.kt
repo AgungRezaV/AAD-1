@@ -43,7 +43,7 @@ class TaskActivity : AppCompatActivity() {
         initAction()
 
         val factory = ViewModelFactory.getInstance(this)
-        taskViewModel = ViewModelProvider(this, factory).get(TaskViewModel::class.java)
+        taskViewModel = ViewModelProvider(this, factory)[TaskViewModel::class.java]
 
         taskViewModel.tasks.observe(this, Observer(this::showRecyclerView))
 

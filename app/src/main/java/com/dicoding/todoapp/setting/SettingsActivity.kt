@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.dicoding.todoapp.R
@@ -55,7 +56,7 @@ class SettingsActivity : AppCompatActivity() {
             prefNotification?.setOnPreferenceChangeListener { preference, newValue ->
                 val channelName = getString(R.string.notify_channel_name)
                 //TODO 13 : Schedule and cancel daily reminder using WorkManager with data channelName
-                val scheduleTask = PeriodicWorkRequestBuilder<NotificationWorker>(1, TimeUnit.DAYS)
+                val scheduleTask = OneTimeWorkRequestBuilder<NotificationWorker>()
                     .addTag(channelName)
                     .build()
 
