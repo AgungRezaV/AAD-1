@@ -9,11 +9,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.dicoding.todoapp.R
 import com.dicoding.todoapp.notification.NotificationWorker
-import java.util.concurrent.TimeUnit
 
 class SettingsActivity : AppCompatActivity() {
 
