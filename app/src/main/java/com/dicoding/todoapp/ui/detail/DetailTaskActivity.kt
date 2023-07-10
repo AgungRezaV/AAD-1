@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.dicoding.todoapp.R
 import com.dicoding.todoapp.data.Task
 import com.dicoding.todoapp.ui.ViewModelFactory
+import com.dicoding.todoapp.utils.DateConverter
 import com.dicoding.todoapp.utils.TASK_ID
 import com.google.android.material.textfield.TextInputEditText
 
@@ -42,7 +43,7 @@ class DetailTaskActivity : AppCompatActivity() {
         val taskObserver = Observer<Task> {
             edTitle.setText(it.title)
             edDescription.setText(it.description)
-            edDueDate.setText(it.dueDateMillis.toString())
+            edDueDate.setText(DateConverter.convertMillisToString(it.dueDateMillis))
         }
 
         viewModel.task.observe(this, taskObserver)
