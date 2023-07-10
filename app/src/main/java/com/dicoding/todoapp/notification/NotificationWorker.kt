@@ -1,13 +1,17 @@
 package com.dicoding.todoapp.notification
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.media.RingtoneManager
 import android.os.Build
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.TaskStackBuilder
 import androidx.core.content.ContextCompat
 import androidx.work.Worker
@@ -19,9 +23,6 @@ import com.dicoding.todoapp.ui.detail.DetailTaskActivity
 import com.dicoding.todoapp.utils.DateConverter
 import com.dicoding.todoapp.utils.NOTIFICATION_CHANNEL_ID
 import com.dicoding.todoapp.utils.TASK_ID
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, params) {
 
@@ -43,48 +44,37 @@ class NotificationWorker(ctx: Context, params: WorkerParameters) : Worker(ctx, p
 
     override fun doWork(): Result {
         //TODO 14 : If notification preference on, get nearest active task from repository and show notification with pending intent
-        val repository = TaskRepository.getInstance(applicationContext)
-
-        CoroutineScope(Dispatchers.IO).launch {
-            val nearestTask = repository.getNearestActiveTask()
-
-            showNotification(nearestTask)
-        }
-
-        return Result.success()
-    }
-
-    private fun showNotification(task: Task) {
-        val notificationManagerCompat = applicationContext.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val nearestTask = TaskRepository.getInstance(applicationContext).getNearestActiveTask()
+        val notificationManager = NotificationManagerCompat.from(applicationContext)
         val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val builder = NotificationCompat.Builder(applicationContext, NOTIFICATION_CHANNEL_ID)
+        val builder = NotificationCompat.Builder(applicationContext)
             .setSmallIcon(R.drawable.ic_notifications)
-            .setContentTitle(task.title)
-            .setContentText("Due ${DateConverter.convertMillisToString(task.dueDateMillis)}.")
+            .setContentTitle(nearestTask.title)
+            .setContentText("Due ${DateConverter.convertMillisToString(nearestTask.dueDateMillis)}.")
             .setColor(ContextCompat.getColor(applicationContext, android.R.color.transparent))
-            .setVibrate(longArrayOf(1000, 1000, 1000, 1000, 1000))
+            .setContentIntent(getPendingIntent(nearestTask))
             .setSound(alarmSound)
+            .setAutoCancel(true)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
                 channelName,
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_HIGH
             )
-
-            channel.enableVibration(true)
-            channel.vibrationPattern = longArrayOf(1000, 1000, 1000, 1000, 1000)
             builder.setChannelId(NOTIFICATION_CHANNEL_ID)
-            notificationManagerCompat.createNotificationChannel(channel)
+            notificationManager.createNotificationChannel(channel)
         }
 
-        val intent = getPendingIntent(task)
-        builder.setAutoCancel(true)
-        builder.setContentIntent(intent)
-
-        val notification = builder.build()
-        notificationManagerCompat.notify(0, notification)
+        if (ActivityCompat.checkSelfPermission(
+                applicationContext,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationManager.notify(nearestTask.id, builder.build())
+        }
+        return Result.success()
     }
 
 }
